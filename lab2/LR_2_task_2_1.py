@@ -3,6 +3,16 @@ from sklearn import preprocessing
 from sklearn.svm import LinearSVC
 from sklearn.multiclass import OneVsOneClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    'C': [0.1, 1, 10],
+    'degree': [2, 3, 4],
+    'coef0': [0, 1, 2]
+}
+
 
 # Вхідний файл, який містить дані
 input_file = "lab2/income_data.txt"
@@ -46,8 +56,9 @@ for i, item in enumerate(X[0]):
 X = X_encoded[:, :-1].astype(int)
 y = X_encoded[:, -1].astype(int)
 
-# Створення SVМ-класифікатора
-classifier = OneVsOneClassifier(LinearSVC(random_state=0))
+
+# Створення SVM-класифікатора з поліноміальним ядром
+classifier = OneVsOneClassifier(SVC(kernel='poly', C=1.0, degree=8, coef0=1))
 
 # Розділення на тренувальний та тестовий набори
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=5)
@@ -61,8 +72,8 @@ from sklearn.metrics import f1_score
 f1 = f1_score(y_test, y_test_pred, average="weighted")
 print("F1 score: " + str(round(100 * f1, 2)) + "%")
 
-# Передбачення результату для тестової точки даних
-input_data = ['37', 'Private', '215646', 'HS-grad', '9', 'Never-married', 'Handlers-cleaners', 'Not-in-family', 'White', 'Male', '0', '0', '40', 'United-States']
+
+input_data = ["52", "Self-emp-inc", "287927", "HS-grad", "9", "Married-civ-spouse", "Exec-managerial", "Wife", "White", "Female", "15024", "0", "40", "United-States"]
 
 # Кодування тестової точки даних
 input_data_encoded = [-1] * len(input_data)
@@ -79,3 +90,15 @@ input_data_encoded = np.array(input_data_encoded).reshape(1, -1)
 predicted_class = classifier.predict(input_data_encoded)
 predicted_label = label_encoder[-1].inverse_transform(predicted_class)[0]
 print(predicted_label)
+
+# Обчислення акуратності
+accuracy = accuracy_score(y_test, y_test_pred)
+print("Accuracy:" + str(round(100 * accuracy, 2)) + "%")
+
+# Обчислення точності
+precision = precision_score(y_test, y_test_pred, average="weighted")
+print("Precision:" + str(round(100 * precision, 2)) + "%")
+
+# Обчислення повноти
+recall = recall_score(y_test, y_test_pred, average="weighted")
+print("Recall:" + str(round(100 * recall, 2)) + "%")
